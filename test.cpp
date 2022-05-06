@@ -23,71 +23,82 @@ int nMaxFD;
 int nArrClient[10];
 int nSocket;
 
-//Process new message function 
-void processNewMessage(int nClientSocket){
-    cout<<"Process the new message for client socket : "<<nClientSocket<<endl;
-	char buff[256+1]={0,};
-	int nRet=recv(nClientSocket,buff,256,0);
-	if(nRet<0){
-		cout<<endl<<"Something Wrong happen ... close the connection for Client..."<<endl;
+// Process new message function
+void processNewMessage(int nClientSocket)
+{
+	cout << "Process the new message for client socket : " << nClientSocket << endl;
+	char buff[256 + 1] = {0,};
+
+	int nRet = recv(nClientSocket, buff, 256, 0);
+	//debugging
+	//cout<<endl<<endl<<".........buff........"<<buff<<endl<<endl<<endl;
+	if (nRet < 0)
+	{
+		cout << endl<< "Something Wrong happen ... close the connection for Client..." << endl;
+
 		closesocket(nClientSocket);
 		for (int i = 0; i < 10; i++)
 		{
-			if(nArrClient[i]==nClientSocket){
-				nArrClient[i]=0;
+			if (nArrClient[i] == nClientSocket)
+			{
+				nArrClient[i] = 0;
 				break;
 			}
 		}
 	}
-	else{
-		cout<<endl<<"The message Recieve from the client is : "<<buff<<endl;
-		//send response to the client
-		send(nClientSocket,"Process Your Request",23,0);
-		cout<<endl<<"************************************************************";
+	else
+	{
+		cout << endl<< "The message Recieve from the client is : " << buff << endl;
+		// send response to the client
+		send(nClientSocket, "Process Your Request", 23, 0);
+		cout << endl
+			 << "************************************************************"<<endl;
 	}
 }
 
-void ProcessTheNewRequest(){
-if (FD_ISSET(nSocket, &fr))
+void ProcessTheNewRequest()
+{
+	if (FD_ISSET(nSocket, &fr))
+	{
+		cout << endl
+			 << "Ready to read. Something new coming..." << endl;
+		// accept the new connection
+		int nLen = sizeof(struct sockaddr);
+		int nClientSocket = accept(nSocket, NULL, &nLen);
+
+		if (nClientSocket > 0)
+		{
+			int i;
+			// put into the client fe_set.
+			for (i = 0; i < 10; i++)
+			{
+				if (nArrClient[i] == 0)
+				{
+					nArrClient[i] = nClientSocket;
+					send(nClientSocket, "Got the connection Successfully", 35, 0);
+					break;
+				}
+			}
+			if (i == 10)
 			{
 				cout << endl
-					 << "Ready to read. Something new coming..." << endl;
-				// accept the new connection
-				int nLen = sizeof(struct sockaddr);
-				int nClientSocket = accept(nSocket, NULL, &nLen);
-
-				if (nClientSocket > 0)
-				{
-					int i;
-					// put into the client fe_set.
-					for (i = 0; i < 10; i++)
-					{
-						if (nArrClient[i] == 0)
-						{
-							nArrClient[i] = nClientSocket;
-							send(nClientSocket, "Got the connection Successfully", 35, 0);
-							break;
-						}
-					}
-					if (i == 10)
-					{
-						cout << endl
-							 << "NO space for a new connection" << endl;
-					}
-				}
+					 << "NO space for a new connection" << endl;
 			}
-			else{
-				for (int i = 0; i < 10; i++)
-				{
-					if(FD_ISSET(nArrClient[i],&fr)){
-						//Got the new message from the client
-						//just rece the new message
-						//just queue that for workspace of your server to full fill the request
-						processNewMessage(nArrClient[i]);
-					}
-				}
-				
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			if (FD_ISSET(nArrClient[i], &fr))
+			{
+				// Got the new message from the client
+				// just rece the new message
+				// just queue that for workspace of your server to full fill the request
+				processNewMessage(nArrClient[i]);
 			}
+		}
+	}
 }
 
 int main()
@@ -107,7 +118,7 @@ int main()
 	}
 
 	// Initialized the Socket
-	 nSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	nSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (nSocket < 0)
 	{
 		cout << endl
@@ -207,8 +218,8 @@ int main()
 		}
 
 		// debuging
-		cout << endl
-			 << "Before select call : " << fr.fd_count << endl;
+		// cout << endl
+		// 	 << "Before select call : " << fr.fd_count << endl;
 
 		// keep waiting for requests and proceed as per the request
 		nRet = select(nMaxFD + 1, &fr, &fw, &fe, &tv);
@@ -231,12 +242,12 @@ int main()
 			// 		 << "Ready to write something." << endl;
 			// }
 			ProcessTheNewRequest();
-			
+
 			// break;
 		}
 		else if (nRet == 0)
 		{
-			cout << "Nothing on PORT : " << PORT << endl;
+			//cout << "Nothing on PORT : " << PORT << endl;
 			// no connection or any communication request made
 			// none of the socket descriptor are ready
 		}
@@ -250,8 +261,8 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 		// debuging
-		cout << endl
-			 << "After select call : " << fr.fd_count << endl;
+		// cout << endl
+		// 	 << "After select call : " << fr.fd_count << endl;
 		// sleep the loop
 		Sleep(2000); // for 2s
 	}

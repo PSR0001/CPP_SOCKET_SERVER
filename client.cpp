@@ -31,13 +31,16 @@ int main(int argc, char const *argv[])
     int nClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (nClientSocket < 0)
     {
-        cout << endl<< "The Socket not opened" << endl;
+        cout << endl
+             << "The Socket not opened" << endl;
         WSACleanup();
         exit(EXIT_FAILURE);
     }
     else
     {
-        cout << endl<< "The Socket open Successfully ! " << nClientSocket << endl<< endl;
+        cout << endl
+             << "The Socket open Successfully ! " << nClientSocket << endl
+             << endl;
     }
     // initialised the environment for sockeaddr structure
     srv.sin_family = AF_INET;
@@ -54,29 +57,35 @@ int main(int argc, char const *argv[])
     }
     else
     {
-        cout << endl<< "Connected to Server " << endl;
+        cout << endl
+             << "Connected to Server " << endl;
 
-        char buff[255] = {0,};
+        char buff[255] = {
+            0,
+        };
 
         recv(nClientSocket, buff, 255, 0);
-        cout<<"Press any key to See the Received message ..."<<endl;
+        cout << "Press any key to See the Received message ..." << endl;
         getchar();
-        cout<<endl<<buff<<endl;
+        cout << endl
+             << buff << endl;
 
-
-        //latest Code
-        cout<<"Now send Your message to server . "<<endl;
+        // latest Code
+        cout << "Now send Your message to server . " << endl;
         while (1)
         {
-            fgets(buff,255,stdin);
-            send(nClientSocket,buff,256,0);
-            cout<<"Press any key to get the response from server ..."<<endl;
-            getchar();
-            recv(nClientSocket, buff, 255, 0);
-            cout<<endl<<buff<<endl<<"Now send next message : "<<endl;
+            cout<<"Enter the message : ";
+            fgets(buff, 255, stdin);
+            //debugging
+            //cout<<endl<<buff<<endl<<endl;
+            send(nClientSocket, buff, 256, 0);
+            //cout << "Press any key to get the response from server ..." << endl;
+            //getchar();
+            recv(nClientSocket, buff, 256, 0);
+            cout << endl
+                 << buff << endl
+                 << "Now send next message : " << endl<<endl;
         }
-         
-
     }
     return 0;
 }
