@@ -1,7 +1,9 @@
 /*
-BACKLOCK = how many request server can handel per second
-fd_set = we can put 64 item . all item act as a kernal obj.
+compile command = "g++ test.cpp -o test2 -lws2_32"
 
+*BACKLOCK = how many request server can handel per second
+*fd_set = we can put 64 item . all item act as a kernal obj.
+#every socket bydefault a blocking socket
 
 
 */
@@ -36,10 +38,11 @@ int main()
 	int nSocket = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
 	if(nSocket<0){
 		cout<<endl<<"The Socket not opened"<<endl;
+		WSACleanup();
 		exit(EXIT_FAILURE);
 		
 	}else{
-		cout<< "The Socket open Successfully ! "<<nSocket<<endl;
+		cout<<endl<< "The Socket open Successfully ! "<<nSocket<<endl<endl;
 	}
 	
 	//initialised the environment for sockeaddr structure
@@ -48,20 +51,48 @@ int main()
 	srv.sin_addr.s_addr = INADDR_ANY;
 	//srv.sin_addr.s_addr = inet_addr("127.0.0.1");
 	memset(&(srv.sin_zero),0,8);
+
+//setsockopt
+	int nOptVal = 0;
+	int nOptLen = sizeof(nOptVal);
 	
-	//bind the socket to the local port
+	nRet = setsockopt(nSocket,SOL_SOCKET,SO_REUSEADDR,(const char*)&nOptVal,nOptLen);
+	if(!nRet){
+		cout<<endl<< "The nsockopt call successful."<<endl;
+	}
+	else{
+		cout<<endl<< "The nsockopt call failed."<<endl;
+	}
+	
+// About the Blocking and non-Blocking socket
+	u_long optval=0; //0=blocking & 1=non-blocking
+	
+	nRet = ioctlsocket(nSocket,FIONBIO, &optval);
+	if(nRet !=0){
+		cout<< "ioctlsocket call failed."<<endl;
+		WSACleanup();
+		exit(EXIT_FAILURE);
+	}
+	else{
+		cout<< "ioctlsocket call passed."<<endl;
+	}
+	
+	
+//bind the socket to the local port
 	nRet  = bind(nSocket,(sockaddr*)&srv,sizeof(sockaddr));
 	if(nRet<0){
 		cout<<"Fail to bind the local PORT"<<endl;
+		WSACleanup();
 		exit(EXIT_FAILURE);
 	}
 	else
 		cout<< "Successfully bind the local PORT"<<endl;
 	
-	//LIsten the request from client (queues the requests)
+//LIsten the request from client (queues the requests)
 	nRet = listen(nSocket,BACKLOCK);
 	if(nRet<0){
 		cout<<"Fail to start to local port"<<endl;
+		WSACleanup();
 		exit(EXIT_FAILURE);
 	}
 	else
@@ -84,7 +115,7 @@ int main()
 	//debuging 
 	cout<<endl<<"Before select call : "<<fr.fd_count<<endl;
 	
-	//keep waiting for requests and proceed as per the request
+//keep waiting for requests and proceed as per the request
 	nRet = select(nMaxFD+1,&fr,&fw,&fe,&tv);
 	if(nRet>0){
 		//when some one connect or communicate with message over
@@ -100,6 +131,10 @@ int main()
 	else{
 		//it fail your application should some use full message
 		cout<<endl<< "Failed to connect ..."<<endl;
+		
+		WSACleanup();
+		exit(EXIT_FAILURE);
+		
 	}
 	//debuging 
 	cout<<endl<<"After select call : "<<fr.fd_count<<endl;
