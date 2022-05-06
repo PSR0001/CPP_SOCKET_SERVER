@@ -171,6 +171,7 @@ int main()
 						if (nArrClient[i] == 0)
 						{
 							nArrClient[i] = nClientSocket;
+							send(nClientSocket,"Got the connection Successfully",255,0);
 							break;
 						}
 					}
