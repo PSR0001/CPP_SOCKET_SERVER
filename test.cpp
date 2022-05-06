@@ -42,7 +42,7 @@ int main()
 		exit(EXIT_FAILURE);
 		
 	}else{
-		cout<<endl<< "The Socket open Successfully ! "<<nSocket<<endl<endl;
+		cout<<endl<< "The Socket open Successfully ! "<<nSocket<<endl<<endl;
 	}
 	
 	//initialised the environment for sockeaddr structure
@@ -58,10 +58,10 @@ int main()
 	
 	nRet = setsockopt(nSocket,SOL_SOCKET,SO_REUSEADDR,(const char*)&nOptVal,nOptLen);
 	if(!nRet){
-		cout<<endl<< "The nsockopt call successful."<<endl;
+		cout<<"The nsockopt call successful."<<endl<<endl;
 	}
 	else{
-		cout<<endl<< "The nsockopt call failed."<<endl;
+		cout<< "The nsockopt call failed."<<endl<<endl;
 	}
 	
 // About the Blocking and non-Blocking socket
