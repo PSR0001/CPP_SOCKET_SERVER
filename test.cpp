@@ -121,7 +121,23 @@ int main()
 		//when some one connect or communicate with message over
 		//a dedicated connection
 		
-		cout<<""<<endl;
+		cout<<"Data on port ... processing now ..."<<endl;
+		//process the request
+		if(FD_ISSET(nSocket,&fe)){
+			cout<<endl<< "There is an exception . just getaway from here"<<endl;
+		}
+		
+		if(FD_ISSET(nSocket,&fw)){
+			cout<<endl<< "Ready to write something."<<endl;
+		}
+		
+		if(FD_ISSET(nSocket,&fr)){
+			cout<<endl<< "Ready to read. Somthing new coming..."<<endl;
+			//accept the new connection
+			
+		}
+		break;
+		
 	}
 	else if(nRet == 0){
 		cout<< "Nothing on PORT : "<<PORT<<endl;
