@@ -1,6 +1,6 @@
 #include <iostream>
 #include <winsock.h>
-#include<stdio.h>
+#include <stdio.h>
 using namespace std;
 
 // macros
@@ -12,6 +12,7 @@ using namespace std;
  *
  *  1.gethostbyname & WSAStartup
  *
+ *  Find system IP address :)
  *
  *********************************************************/
 
@@ -60,6 +61,7 @@ int main()
         case AF_INET:
             cout << endl
                  << "AF_INET";
+            srv.sin_family = AF_INET;
             break;
 
         case AF_NETBIOS:
@@ -75,17 +77,22 @@ int main()
         int i = 0;
         if (remoteHost->h_addrtype == AF_INET)
         {
-            while (remoteHost->h_addr_list[i] !=0)
+            while (remoteHost->h_addr_list[i] != 0)
             {
-                addr.s_addr = *(u_long*)remoteHost->h_addr_list[i++];
-                cout<<endl<<inet_ntoa(addr);
-
+                addr.s_addr = *(u_long *)remoteHost->h_addr_list[i++];
+                cout << endl
+                     << inet_ntoa(addr);
             }
-            
         }
-        else if(remoteHost->h_addrtype == AF_NETBIOS){
-            cout<<endl<<"NETBIOS address was returned.0";
+        else if (remoteHost->h_addrtype == AF_NETBIOS)
+        {
+            cout << endl
+                 << "NETBIOS address was returned.0";
         }
+
+        srv.sin_port = htons(PORT);
+        srv.sin_addr.s_addr = addr.s_addr;
+        memset(&(srv.sin_zero), 0, 8);
     }
 
     return 0;
