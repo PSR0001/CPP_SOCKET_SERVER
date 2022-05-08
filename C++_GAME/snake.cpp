@@ -127,6 +127,7 @@ void input()
         score++;
         fruitX = rand() % height;
         fruitY = rand() % width;
+        
         ntail++;
     }
 }
@@ -174,7 +175,8 @@ void logic()
 
 int main()
 {
-
+    time_t t1;
+    srand ( (unsigned) time (&t1)); 
     setup();
 
     while (!gameOver)
@@ -182,7 +184,7 @@ int main()
         draw();
         input();
         logic();
-        Sleep(10);
+        Sleep(50);
     }
 
     return 0;
