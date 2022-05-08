@@ -8,7 +8,7 @@ using namespace std;
 
 int main(){
   string cmd = "ipconfig";
-  string filename = "macaddress.txt";
+  string filename = "IP_Config.txt";
   
   system((cmd + ">" + filename).c_str());
   string line;
