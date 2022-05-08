@@ -1,12 +1,19 @@
 #include <iostream>
 #include <conio.h>
 #include <winbase.h>
+#include<windows.h>
+#include <time.h>
 using namespace std;
 // global variables
 bool gameOver;
 const int width = 25;
 const int height = 25;
 int x, y, fruitX, fruitY, score;
+
+// snake tail
+int tailX[100], tailY[100];
+int ntail;
+
 enum eDirection
 {
     STOP = 0,
@@ -50,8 +57,16 @@ void draw()
             else if (i == fruitY && j == fruitX)
                 cout << "F";
             else
+            {
+                for (int k = 0; k < ntail; k++)
+                {
+                    if (tailX[k] == j && tailY[k] == i)
+                    {
+                        cout << "o";
+                    }
+                }
                 cout << " ";
-
+            }
             if (j == (width - 1))
                 cout << "#";
         }
@@ -101,15 +116,39 @@ void input()
     {
         gameOver = true;
     }
+
+    for (int i = 0; i < ntail; i++)
+        if (tailX[i] == x && tailY[i] == y)
+            gameOver = true;
+
+
     if (x == fruitX && y == fruitY)
     {
         score++;
         fruitX = rand() % height;
         fruitY = rand() % width;
+        ntail++;
     }
 }
 void logic()
 {
+    // tail logic
+    int prevX = tailX[0];
+    int prevY = tailY[0];
+    int prev2X, prev2Y;
+    tailX[0] = x;
+    tailY[0] = y;
+    for (int i = 0; i < ntail; i++)
+    {
+
+        prev2X = tailX[i];
+        prev2Y = tailY[i];
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+
     switch (dir)
     {
     case LEFT:
@@ -135,6 +174,7 @@ void logic()
 
 int main()
 {
+
     setup();
 
     while (!gameOver)
