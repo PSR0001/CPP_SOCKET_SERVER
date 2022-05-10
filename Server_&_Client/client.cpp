@@ -45,7 +45,7 @@ int main(int argc, char const *argv[])
     // initialised the environment for sockeaddr structure
     srv.sin_family = AF_INET;
     srv.sin_port = htons(PORT);
-    srv.sin_addr.s_addr = inet_addr("127.0.0.1");
+    srv.sin_addr.s_addr = inet_addr("172.217.197.102");
 
     nRet = connect(nClientSocket, (struct sockaddr *)&srv, sizeof(srv));
 
