@@ -1,14 +1,29 @@
-#include <winsock.h>
-#include <conio.h>
 
-#include <stdlib.h>
+
+// header file
+#include <signal.h>
+#include <stdio.h>
 #include <string.h>
-#include <stdio.h>  
+#include <unistd.h>
+#include <stdarg.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/time.h>
+//#include<winsock.h>
+
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <stdlib.h>
+#include <stdio.h>
+// #include<ws2tcpip.h>
+
 // macros
 #define PORT 9909
 
 
 struct sockaddr_in srv;
+
 
 // Global variable
 int nClientSocket;
@@ -40,6 +55,8 @@ int main(int argc, char const *argv[])
     srv.sin_family = AF_INET;
     srv.sin_port = htons(PORT);
     srv.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+ 
 
     nRet = connect(nClientSocket, (struct sockaddr *)&srv, sizeof(srv));
 
@@ -79,3 +96,6 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
+
+
