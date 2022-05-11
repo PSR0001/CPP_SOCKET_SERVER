@@ -180,7 +180,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	else
-		cout << "Successfully bind the local PORT" << endl;
+		cout << "Successfully bind the local PORT " <<PORT<< endl;
 
 	// LIsten the request from client (queues the requests)
 	nRet = listen(nSocket, BACKLOCK);

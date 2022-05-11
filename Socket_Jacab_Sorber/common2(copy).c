@@ -29,17 +29,18 @@ void err_n_die(const char *fmt, ...);
 int inet_pton(int af, const char *src, void *dst);
 
 
+
+
 int main(int argc, char const *argv[])
 {
-    int sockfd, n,nRet;
+    int sockfd, n;
     int sendbytes;
     struct sockaddr_in servaddr;
     char sendline[MAXLINE];
     char recvline[MAXLINE];
-    int OP;
 
-    // if (argc != 2)
-    //     err_n_die("usage : %s <server address>", argv[0]);
+    if (argc != 2)
+        err_n_die("usage : %s <server address>", argv[0]);
     
     WSADATA ws;
 
@@ -48,42 +49,29 @@ int main(int argc, char const *argv[])
     else
       printf("WSA initialised successfully !\n");
     
-    // Initialized the Socket
-    sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sockfd < 0)
-    {
-        printf("The Socket not opened\n");
-        WSACleanup();
-        exit(EXIT_FAILURE);
-    }
-    else
-         printf( "The Socket open Successfully ! %d\n", sockfd );
-    
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) < 0)) // socket created //0 for tcp
+        err_n_die("Error while creating the socket : \n");
 
-
-
+     printf("\n%d\n",sockfd);
     ZeroMemory(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(SERVER_PORT);
 
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
- 
-    // printf("%s", servaddr.sin_addr);
-    // OP=inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+    int OP;
+    OP=inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
 
-    // if (OP <= 0)
-    //     err_n_die("inet_pton error for %s", argv[1]);
+    if (OP <= 0)
+        err_n_die("inet_pton error for %s", argv[1]);
+   
+         // translate address //  "1.2.3.4" => [1,2,3,4]
+//        printf("\n%s\n\n",argv[1]);
+//  servaddr.sin_addr.s_addr = inet_addr(argv[1]);
+        printf("\n%d\n",sockfd);
+    
+    if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) < 0)
+        err_n_die("\nConnection Failed\n");
 
-     nRet = connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
-
-    if (nRet < 0)
-    {
-        printf("Connect Failed !\n");
-        WSACleanup();
-        exit(EXIT_FAILURE);
-    }
-
-    sprintf(sendline, "GET / HTTP/1.1\r\n\r\n");
+    sprintf(sendline, "GET/HTTP/1.1\r\n\r\n");
     sendbytes = strlen(sendline);
 
     // send the request
