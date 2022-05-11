@@ -18,6 +18,7 @@
 
 unsigned char buff[4096];
 const char *recvbuf2 = "hello";
+const char *sbuff[4096];
 
 int __cdecl main(void)
 {
@@ -99,6 +100,15 @@ int __cdecl main(void)
         return 1;
     }
 
+    iResult = send(ClientSocket, sbuff, (int)strlen(sbuff), 0);
+    
+   if (iResult == SOCKET_ERROR)
+    {
+        printf("send failed with error: %d\n", WSAGetLastError());
+        closesocket(ClientSocket);
+        WSACleanup();
+        return 1;
+    }
     // No longer need server socket
     //closesocket(ListenSocket);
 
@@ -116,9 +126,13 @@ int __cdecl main(void)
         }
 
         snprintf((char *)buff, sizeof(buff), "HTTP/1.1 200 OK\r\n\r\nHello");
-        printf("LOL : %d\n",x);
-        x++;
-    } while (x < 10);
+        // printf("LOL : %d\n",x);
+       
+    } while (1);
+
+
+
+
 
     // shutdown the connection since we're done
     iResult = shutdown(ClientSocket, SD_SEND);

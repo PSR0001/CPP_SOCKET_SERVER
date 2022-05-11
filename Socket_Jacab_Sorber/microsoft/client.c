@@ -15,6 +15,8 @@ char buf[512] = {
     0,
 };
 
+char sendline[4096];
+
 const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 
 int __cdecl main(int argc, char **argv)
@@ -135,7 +137,8 @@ int __cdecl main(int argc, char **argv)
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0){
             printf("Bytes received: %d\n", iResult);
-            printf("Bytes received: %s\n", recvbuf);
+            printf("Bytes received: %s\n\n\n", recvbuf);
+            //sprintf(sendline, "GET/HTTP/1.1\r\n\r\n");
         }
         else if (iResult == 0)
             printf("Connection closed\n");
