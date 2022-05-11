@@ -1,3 +1,7 @@
+
+#define WIN32_LEAN_AND_MEAN
+#define WINVER WindowsXP
+
 #include <iostream>
 #include <winsock.h>
 #include <conio.h>
