@@ -116,7 +116,6 @@ int main()
 	else
 		printf("Started listening to local port\n" );
 
-	d
 	// end prog
 	printf("Press any key to Exit\n" );
 	getch();

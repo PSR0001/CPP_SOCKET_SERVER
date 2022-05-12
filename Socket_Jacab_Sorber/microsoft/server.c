@@ -15,6 +15,7 @@
 
 #define DEFAULT_BUFLEN 4096
 #define DEFAULT_PORT "8000"
+#define SA struct sockaddr
 
 unsigned char buff[4096];
 const char *recvbuf2 = "hello";
@@ -22,6 +23,11 @@ const char sbuff[4096];
 
 char *htmlRequest , htmlResponse[DEFAULT_BUFLEN];
 int recv_size;
+
+
+//function prototype
+
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 
 int __cdecl main(void)
 {
@@ -33,6 +39,11 @@ int __cdecl main(void)
 
     struct addrinfo *result = NULL;
     struct addrinfo hints;
+
+    //Client IP variable
+    struct sockaddr_in addr;
+    socklen_t addr_len;
+    char client_address[DEFAULT_BUFLEN+1];
 
     int iSendResult;
     char recvbuf[DEFAULT_BUFLEN];
@@ -93,8 +104,20 @@ int __cdecl main(void)
         return 1;
     }
 
+//Previous Code
     // Accept a client socket
-    ClientSocket = accept(ListenSocket, NULL, NULL);
+    // ClientSocket = accept(ListenSocket, NULL, NULL);
+    // if (ClientSocket == INVALID_SOCKET)
+    // {
+    //     printf("accept failed with error: %d\n", WSAGetLastError());
+    //     closesocket(ListenSocket);
+    //     WSACleanup();
+    //     return 1;
+    // }
+
+
+    // Accept a client socket
+    ClientSocket = accept(ListenSocket, (SA*)&addr, &addr_len);
     if (ClientSocket == INVALID_SOCKET)
     {
         printf("accept failed with error: %d\n", WSAGetLastError());
@@ -102,6 +125,10 @@ int __cdecl main(void)
         WSACleanup();
         return 1;
     }
+
+    inet_ntop(AF_INET,&addr,client_address,DEFAULT_BUFLEN);
+
+    printf("Client address : %s\n",client_address);
 
 //     iResult = send(ClientSocket, sbuff, (int)strlen(sbuff), 0);
     
@@ -158,4 +185,28 @@ int __cdecl main(void)
     WSACleanup();
 
     return 0;
+}
+
+
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
+{
+  struct sockaddr_storage ss;
+  unsigned long s = size;
+
+  ZeroMemory(&ss, sizeof(ss));
+  ss.ss_family = af;
+
+  switch(af) {
+    case AF_INET:
+      ((struct sockaddr_in *)&ss)->sin_addr = *(struct in_addr *)src;
+      break;
+    case AF_INET6:
+      ((struct sockaddr_in6 *)&ss)->sin6_addr = *(struct in6_addr *)src;
+      break;
+    default:
+      return NULL;
+  }
+  /* cannot direclty use &size because of strict aliasing rules */
+  return (WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, dst, &s) == 0)?
+          dst : NULL;
 }
