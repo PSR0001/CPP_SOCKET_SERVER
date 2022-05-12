@@ -17,13 +17,14 @@ char buf[512] = {
 
 char sendline[4096];
 
+
 const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 
 int __cdecl main(int argc, char **argv)
 {
     WSADATA wsaData;
     SOCKET ConnectSocket = INVALID_SOCKET;
-
+SOCKET s;
     // struct sockaddr
     struct addrinfo *result = NULL,
                     *ptr = NULL,
@@ -133,6 +134,7 @@ int __cdecl main(int argc, char **argv)
     // Receive until the peer closes the connection
     do
     {
+       
 
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0){

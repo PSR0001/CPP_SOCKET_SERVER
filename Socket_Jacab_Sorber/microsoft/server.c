@@ -18,7 +18,10 @@
 
 unsigned char buff[4096];
 const char *recvbuf2 = "hello";
-const char *sbuff[4096];
+const char sbuff[4096];
+
+char *htmlRequest , htmlResponse[DEFAULT_BUFLEN];
+int recv_size;
 
 int __cdecl main(void)
 {
@@ -100,15 +103,15 @@ int __cdecl main(void)
         return 1;
     }
 
-    iResult = send(ClientSocket, sbuff, (int)strlen(sbuff), 0);
+//     iResult = send(ClientSocket, sbuff, (int)strlen(sbuff), 0);
     
-   if (iResult == SOCKET_ERROR)
-    {
-        printf("send failed with error: %d\n", WSAGetLastError());
-        closesocket(ClientSocket);
-        WSACleanup();
-        return 1;
-    }
+//    if (iResult == SOCKET_ERROR)
+//     {
+//         printf("send failed with error: %d\n", WSAGetLastError());
+//         closesocket(ClientSocket);
+//         WSACleanup();
+//         return 1;
+//     }
     // No longer need server socket
     //closesocket(ListenSocket);
 
@@ -116,6 +119,12 @@ int __cdecl main(void)
     int x = 0;
     do
     {
+         htmlRequest = "GET / HTTP/1.1\nAccept: text/plain, text/html\n\r\n\r\n\r\n\r\nhello";
+    if( send(ClientSocket, htmlRequest , strlen(htmlRequest) , 0) < 0)
+        return 1;
+    // recv_size = recv(ClientSocket , htmlResponse, sizeof(htmlResponse) , 0);
+    // htmlResponse[recv_size] = '\0';
+    // printf("%s",htmlResponse);
 
         iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0)
@@ -125,7 +134,7 @@ int __cdecl main(void)
             printf("Bytes received: %s\n", recvbuf);
         }
 
-        snprintf((char *)buff, sizeof(buff), "HTTP/1.1 200 OK\r\n\r\nHello");
+        // snprintf((char *)buff, sizeof(buff), "HTTP/1.1 200 OK\r\n\r\nHello");
         // printf("LOL : %d\n",x);
        
     } while (1);
