@@ -24,9 +24,12 @@ compile command = "g++ server.cpp -o server -lws2_32"
 #include <conio.h>
 #include <stdint.h>
 
+using namespace std;
+
 #define PORT 3000
 #define BACKLOCK 5
-using namespace std;
+#define MAX_BUFFER 5120
+
 
 string text;
 stringstream stream;
@@ -159,7 +162,7 @@ int main()
             while (feof(sendFile) == 0)
             {
                 int numread;
-                char sendBuffer[5120];
+                char sendBuffer[MAX_BUFFER];
 
                 numread = fread(sendBuffer, sizeof(unsigned char), 3000, sendFile);
                 if (numread > 0)
