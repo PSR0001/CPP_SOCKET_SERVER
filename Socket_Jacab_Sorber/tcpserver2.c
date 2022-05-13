@@ -2,7 +2,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define WINVER WindowsXP
-#include <winsock.h>
+
+#include <winsock2.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,11 +14,12 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <strings.h>
-#include<windows.h>
+#include <windows.h>
 
-
+#include <ws2tcpip.h>
 #include <winsock.h>
 #include <conio.h>
+#include <stdint.h>
 
 #define PORT 5000
 #define BACKLOCK 5
@@ -25,28 +27,44 @@
 #define MAXLINE 4096
 
 
-struct sockaddr_in srv;
+struct sockaddr_in srv,server_addr,client_addr;
+
+int fd_server,fd_client;
+
 
 // global variable;
 int nMaxFD;
 int nArrClient[10];
 int nSocket;
-int connfd,listenfd;
-  char *buff2[MAXLINE + 1] = {
-        0,
-    };
+int connfd, listenfd;
+char buff2[MAXLINE + 1] = {
+	0,
+};
+
+char webpage[] =
+	"HTTP/1.1 200 OK\r\n"
+	"Content-Type: text/html; charset=UTF-8\r\n\r\n"
+	"<!DOCTYPE html>\r\n"
+	"<html lang='en'>\r\n"
+	"<head><title>Document</title></head>\r\n"
+	"<body>\r\n"
+	"<center><h1>I am served by C server.</h1></center>\r\n"
+	"</body>\r\n"
+	"</html>\r\n";
 
 int main()
 {
+	
 	int nRet = 0;
+	
+    struct addrinfo *result = NULL;
 
 	// initialised WSA variables
 	WSADATA ws;
 	if (WSAStartup(MAKEWORD(2, 2), &ws) < 0)
-		printf( "WSA failed to initialised .\n");
+		printf("WSA failed to initialised .\n");
 	else
-		printf( "WSA initialised successfully !\n");
-	
+		printf("WSA initialised successfully !\n");
 
 	// Initialized the Socket
 	nSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -57,12 +75,11 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	else
-		printf("The Socket open Successfully ! %d\n" ,nSocket );
-	
+		printf("The Socket open Successfully ! %d\n", nSocket);
 
 	// initialised the environment for sockeaddr structure
 
-    ZeroMemory(&srv, sizeof(srv));
+	ZeroMemory(&srv, sizeof(srv));
 	srv.sin_family = AF_INET;
 	srv.sin_port = htons(PORT);
 	srv.sin_addr.s_addr = INADDR_ANY;
@@ -74,50 +91,66 @@ int main()
 	int nOptLen = sizeof(nOptVal);
 	nRet = setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, (const char *)&nOptVal, nOptLen);
 	if (!nRet)
-		printf("The nsockopt call successful.\n" );
-	
+		printf("The nsockopt call successful.\n");
+
 	else
-		printf("The nsockopt call failed.\n" );
-	
+		printf("The nsockopt call failed.\n");
 
-	// About the Blocking and non-Blocking socket
-	u_long optval = 0; // 0=blocking & 1=non-blocking
 
-	nRet = ioctlsocket(nSocket, FIONBIO, &optval);
-	if (nRet != 0)
+	// bind the server
+
+	nRet = bind (nSocket,result->ai_addr, (int)result->ai_addrlen);
+	if (nRet<0)
 	{
-		printf( "ioctlsocket call failed. \n" );
+		printf("Bind Error\n");
 		WSACleanup();
 		exit(EXIT_FAILURE);
 	}
 	else
-		printf("ioctlsocket call passed.\n" );
-	
-
-	// bind the socket to the local port
-	nRet = bind(nSocket, (SA *)&srv, sizeof(srv));
-	if (nRet < 0)
-	{
-		printf("Fail to bind the local PORT\n" );
-		WSACleanup();
-		exit(EXIT_FAILURE);
-	}
-	else
-		printf("Successfully bind the local PORT %d\n",PORT);
+	  printf("Bind Successfully!");
 
 	// LIsten the request from client (queues the requests)
 	nRet = listen(nSocket, BACKLOCK);
 	if (nRet < 0)
 	{
-		printf("Fail to start to local port\n" );
+		printf("Fail to start to local port\n");
 		WSACleanup();
 		exit(EXIT_FAILURE);
 	}
 	else
-		printf("Started listening to local port\n" );
+		printf("Started listening to local port\n");
+
+
+	while(1){
+
+		fd_client=accept(nSocket,(SA*)&client_addr,(int*)sizeof(client_addr));
+
+		if(fd_client==INVALID_SOCKET){
+			printf("ERROR %s\n",WSAGetLastError());
+			exit(EXIT_FAILURE);
+		}
+		else{
+			printf("Client Connected ... ");
+
+			memset(buff2,0,MAXLINE);
+		
+		read(fd_client,buff2,MAXLINE);
+
+		printf("\n%s\n",buff2);
+
+		write(fd_client,webpage,sizeof(webpage)-1);
+		
+		
+		}
+
+		
+
+
+
+	}
 
 	// end prog
-	printf("Press any key to Exit\n" );
+	printf("Press any key to Exit\n");
 	getch();
 	return 0;
 }
