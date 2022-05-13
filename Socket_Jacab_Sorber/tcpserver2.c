@@ -20,17 +20,16 @@
 #include <winsock.h>
 #include <conio.h>
 #include <stdint.h>
+// #include<fstream>
 
 #define PORT 5000
 #define BACKLOCK 5
 #define SA struct sockaddr
 #define MAXLINE 4096
 
+struct sockaddr_in srv, server_addr, client_addr;
 
-struct sockaddr_in srv,server_addr,client_addr;
-
-int fd_server,fd_client;
-
+int fd_server, fd_client, fdimg;
 
 // global variable;
 int nMaxFD;
@@ -54,10 +53,10 @@ char webpage[] =
 
 int main()
 {
-	
+
 	int nRet = 0;
-	
-    struct addrinfo *result = NULL;
+
+	struct addrinfo *result = NULL;
 
 	// initialised WSA variables
 	WSADATA ws;
@@ -80,9 +79,9 @@ int main()
 	// initialised the environment for sockeaddr structure
 
 	ZeroMemory(&srv, sizeof(srv));
-	srv.sin_family = AF_INET;
-	srv.sin_port = htons(PORT);
-	srv.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = INADDR_ANY;
 	// srv.sin_addr.s_addr = inet_addr("127.0.0.1");
 	memset(&(srv.sin_zero), 0, 8);
 
@@ -90,24 +89,18 @@ int main()
 	int nOptVal = 0;
 	int nOptLen = sizeof(nOptVal);
 	nRet = setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, (const char *)&nOptVal, nOptLen);
-	if (!nRet)
-		printf("The nsockopt call successful.\n");
-
-	else
-		printf("The nsockopt call failed.\n");
-
 
 	// bind the server
 
-	nRet = bind (nSocket,result->ai_addr, (int)result->ai_addrlen);
-	if (nRet<0)
+	nRet = bind(nSocket, (SA *)&server_addr, (sizeof(server_addr) + 100));
+	if (nRet < 0)
 	{
-		printf("Bind Error\n");
+		printf("Bind Error %s\n", WSAGetLastError());
 		WSACleanup();
 		exit(EXIT_FAILURE);
 	}
 	else
-	  printf("Bind Successfully!");
+		printf("Bind Successfully!\n");
 
 	// LIsten the request from client (queues the requests)
 	nRet = listen(nSocket, BACKLOCK);
@@ -120,33 +113,35 @@ int main()
 	else
 		printf("Started listening to local port\n");
 
+	int nLen = sizeof(struct sockaddr);
 
-	while(1){
+	while (1)
+	{
 
-		fd_client=accept(nSocket,(SA*)&client_addr,(int*)sizeof(client_addr));
-
-		if(fd_client==INVALID_SOCKET){
-			printf("ERROR %s\n",WSAGetLastError());
+		int fd_client = accept(nSocket, NULL, &nLen);
+		if (fd_client == INVALID_SOCKET)
+		{
+			printf("socket failed with error: %ld\n", WSAGetLastError());
+			closesocket(nSocket);
 			exit(EXIT_FAILURE);
 		}
-		else{
+		else
+		{
 			printf("Client Connected ... ");
 
-			memset(buff2,0,MAXLINE);
-		
-		read(fd_client,buff2,MAXLINE);
+			int nRet = recv(fd_client, buff2, 4096, 0);
+			printf("\n%s\n", buff2);
 
-		printf("\n%s\n",buff2);
+			memset(buff2, 0, MAXLINE);
 
-		write(fd_client,webpage,sizeof(webpage)-1);
-		
-		
+			read(fd_client, buff2, MAXLINE);
+
+			printf("\n%s\n", buff2);
+
+			printf("***************************************************\n");
+
+			send(fd_client,webpage,sizeof(webpage)+1,0);
 		}
-
-		
-
-
-
 	}
 
 	// end prog
