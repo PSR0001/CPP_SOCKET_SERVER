@@ -19,8 +19,6 @@ compile command = "g++ server.cpp -o server -lws2_32"
 #include <windows.h>
 #include <sstream>
 
-
-
 #include <ws2tcpip.h>
 #include <winsock.h>
 #include <conio.h>
@@ -34,19 +32,18 @@ string text;
 stringstream stream;
 struct sockaddr_in srv;
 
-
 // global variable;
-int nSocket,fd_client;
+int nSocket, fd_client;
 
 int main()
 {
     int nRet = 0;
     FILE *sendFile = fopen("index.html", "r");
     if (sendFile == NULL) /* check it the file was opened */
-        {
-            printf("File not open");
-            exit(EXIT_FAILURE);
-        }
+    {
+        printf("File not open");
+        exit(EXIT_FAILURE);
+    }
 
     // initialised WSA variables
     WSADATA ws;
@@ -129,76 +126,81 @@ int main()
         cout << "Started listening to local port" << endl;
     //-----------------------Open html file------------------------------
 
-int nLen = sizeof(struct sockaddr);
-
-int fd_client = accept(nSocket, NULL, &nLen);
-		if (fd_client == INVALID_SOCKET)
-		{
-			printf("socket failed with error: %ld\n", WSAGetLastError());
-			closesocket(nSocket);
-			exit(EXIT_FAILURE);
-		}
-
-
-
-    fseek(sendFile, 0L, SEEK_END);
-    /* you can use a stringstream, it's cleaner */
-    stream << "HTTP/1.1 200 OK\nContent-length: " << ftell(sendFile) << "\n";
-    fseek(sendFile, 0L, SEEK_SET);
-
-    text = stream.str();
-   
-
-    send(fd_client, text.c_str(), text.length(), 0);
-
-    cout << "Sent : " << text << endl;
-
-    text = "Content-Type: text/html\n\n";
-    send(fd_client, text.c_str(), text.length(), 0);
-
-    cout << "Sent : %s" << text << endl;
-    while (feof(sendFile) == 0)
+    while (1)
     {
-        int numread;
-        char sendBuffer[500];
+        int nLen = sizeof(struct sockaddr);
 
-        numread = fread(sendBuffer, sizeof(unsigned char), 300, sendFile);
-        if (numread > 0)
+        int fd_client = accept(nSocket, NULL, &nLen);
+        if (fd_client == INVALID_SOCKET)
         {
-            char *sendBuffer_ptr;
-
-            sendBuffer_ptr = sendBuffer;
-            do
-            {
-                fd_set wfd;
-                timeval tm;
-
-                FD_ZERO(&wfd);
-                FD_SET(fd_client, &wfd);
-
-                tm.tv_sec = 10;
-                tm.tv_usec = 0;
-                /* first call select, and if the descriptor is writeable, call send */
-                if (select(1 + fd_client, NULL, &wfd, NULL, &tm) > 0)
-                {
-                    int numsent;
-
-                    numsent = send(fd_client, sendBuffer_ptr, numread, 0);
-                    if (numsent == -1)
-                        exit(EXIT_FAILURE);
-                    sendBuffer_ptr += numsent;
-                    numread -= numsent;
-                }
-            } while (numread > 0);
+            printf("socket failed with error: %ld\n", WSAGetLastError());
+            closesocket(nSocket);
+            exit(EXIT_FAILURE);
         }
+
+        else
+        {
+
+            fseek(sendFile, 0L, SEEK_END);
+            /* you can use a stringstream, it's cleaner */
+            stream << "HTTP/1.1 200 OK\nContent-length: " << ftell(sendFile) << "\n";
+            fseek(sendFile, 0L, SEEK_SET);
+
+            text = stream.str();
+
+            send(fd_client, text.c_str(), text.length(), 0);
+
+            cout << "Sent : " << text << endl;
+
+            text = "Content-Type: text/html\n\n";
+            send(fd_client, text.c_str(), text.length(), 0);
+
+            cout << "Sent : %s" << text << endl;
+            while (feof(sendFile) == 0)
+            {
+                int numread;
+                char sendBuffer[5120];
+
+                numread = fread(sendBuffer, sizeof(unsigned char), 3000, sendFile);
+                if (numread > 0)
+                {
+                    char *sendBuffer_ptr;
+
+                    sendBuffer_ptr = sendBuffer;
+                    do
+                    {
+                        fd_set wfd;
+                        timeval tm;
+
+                        FD_ZERO(&wfd);
+                        FD_SET(fd_client, &wfd);
+
+                        tm.tv_sec = 10;
+                        tm.tv_usec = 0;
+                        /* first call select, and if the descriptor is writeable, call send */
+                        if (select(1 + fd_client, NULL, &wfd, NULL, &tm) > 0)
+                        {
+                            int numsent;
+
+                            numsent = send(fd_client, sendBuffer_ptr, numread, 0);
+                            if (numsent == -1)
+                                exit(EXIT_FAILURE);
+                            sendBuffer_ptr += numsent;
+                            numread -= numsent;
+                        }
+                    } while (numread > 0);
+                }
+            }
+        }
+        /* don't forget to close the file. */
+
+        closesocket(fd_client);
+        
+        // Sleep(500);
+        //--------------------------------------------------------------
     }
-    /* don't forget to close the file. */
+
     fclose(sendFile);
-
-    closesocket(fd_client);
-    //--------------------------------------------------------------
-   
-
     // end prog
     cout << "Press any key to Exit";
     getch();
