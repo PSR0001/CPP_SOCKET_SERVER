@@ -127,6 +127,7 @@ int main()
 		}
 		else
 		{
+
 			printf("Client Connected ... ");
 
 			int nRet = recv(fd_client, buff2, 4096, 0);
@@ -142,6 +143,7 @@ int main()
 
 			send(fd_client,webpage,sizeof(webpage)+1,0);
 		}
+		closesocket(fd_client);
 	}
 
 	// end prog
