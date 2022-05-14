@@ -1,3 +1,10 @@
+/**************************************************
+ * 
+ *  compile command = "gcc client.c -o client -lws2_32"
+ *  run code = ./client.exe www.google.com
+ * 
+ * ************************************************/
+
 #define WIN32_LEAN_AND_MEAN
 // #define _WIN32_WINNT
 #define WINVER WindowsXP
@@ -15,8 +22,9 @@ char buf[512] = {
     0,
 };
 
-char sendline[4096];
+char message[] = "GET / HTTP/1.1\r\n\r\n";
 
+char sendline[4096];
 
 const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 
@@ -24,7 +32,7 @@ int __cdecl main(int argc, char **argv)
 {
     WSADATA wsaData;
     SOCKET ConnectSocket = INVALID_SOCKET;
-SOCKET s;
+    SOCKET s;
     // struct sockaddr
     struct addrinfo *result = NULL,
                     *ptr = NULL,
@@ -75,7 +83,7 @@ SOCKET s;
         ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
                                ptr->ai_protocol);
 
-        //IP Address
+        // IP Address
         printf("address: %s -> %s\n", argv[1], inet_ntop(ptr->ai_family, ptr->ai_addr, buf, sizeof(buf)));
 
         if (ConnectSocket == INVALID_SOCKET)
@@ -110,7 +118,7 @@ SOCKET s;
     }
 
     // Send an initial buffer
-    iResult = send(ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
+    iResult = send(ConnectSocket, message, sizeof(message), 0);
     if (iResult == SOCKET_ERROR)
     {
         printf("send failed with error: %d\n", WSAGetLastError());
@@ -134,13 +142,13 @@ SOCKET s;
     // Receive until the peer closes the connection
     do
     {
-       
 
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
-        if (iResult > 0){
+        if (iResult > 0)
+        {
             printf("Bytes received: %d\n", iResult);
             printf("Bytes received: %s\n\n\n", recvbuf);
-            //sprintf(sendline, "GET/HTTP/1.1\r\n\r\n");
+            // sprintf(sendline, "GET/HTTP/1.1\r\n\r\n");
         }
         else if (iResult == 0)
             printf("Connection closed\n");
